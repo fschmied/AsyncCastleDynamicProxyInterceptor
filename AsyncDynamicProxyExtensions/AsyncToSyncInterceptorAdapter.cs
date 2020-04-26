@@ -17,8 +17,32 @@ namespace AsyncInterceptor.AsyncDynamicProxyExtensions
         public void Intercept(IInvocation invocation)
         {
             var asyncInvocation = new SyncToAsyncVoidInvocationAdapter(invocation);
-            var asyncInterceptorTask = _asyncInterceptor.Intercept(asyncInvocation);
+            var asyncInterceptorTask = AsyncIntercept(asyncInvocation);
             invocation.ReturnValue = asyncInterceptorTask;
+        }
+
+        private async Task AsyncIntercept(IAsyncVoidInvocation asyncInvocation)
+        {
+            // Note: There must not be an await before asyncVoidInvocation.Proceed because DynamicProxy
+            // will reset what Proceed does once the method returns synchronously (which an await would do).
+            _asyncInterceptor.OnBeforeProceed(asyncInvocation.Method, asyncInvocation.Arguments, out var state);
+
+            try
+            {
+                await asyncInvocation.Proceed();
+            }
+            catch (Exception ex)
+            {
+                _asyncInterceptor.OnExceptionInProceed(asyncInvocation.Method, asyncInvocation.Arguments, state, ex, out var rethrow);
+                if (rethrow)
+                    throw;
+            }
+            finally
+            {
+                await _asyncInterceptor.OnFinallyAfterProceed(asyncInvocation.Method, asyncInvocation.Arguments, state);
+            }
+
+            await _asyncInterceptor.OnAfterSuccessfulProceed(asyncInvocation.Method, asyncInvocation.Arguments, state);
         }
 
         class SyncToAsyncVoidInvocationAdapter : IAsyncVoidInvocation
