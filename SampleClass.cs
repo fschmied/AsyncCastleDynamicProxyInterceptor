@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace AsyncInterceptor
 {
-    class SampleClass
+    public class SampleClass
     {
         public virtual async Task Foo(bool throwException)
         {

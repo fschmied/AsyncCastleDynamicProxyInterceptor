@@ -6,7 +6,7 @@ namespace AsyncInterceptor.AsyncDynamicProxyExtensions
 {
     interface IAsyncVoidInvocation
     {
-        object[] Arguments { get; set; }
+        object[] Arguments { get; }
 
         MethodInfo Method { get; }
         Task Proceed();

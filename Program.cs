@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AsyncInterceptor.AsyncDynamicProxyExtensions;
-using AsyncInterceptor.CastleDynamicProxySimulation;
+using Castle.DynamicProxy;
 
 namespace AsyncInterceptor
 {
@@ -9,14 +9,16 @@ namespace AsyncInterceptor
     {
         static async Task Main(string[] args)
         {
+            var proxyGenerator = new ProxyGenerator();
+
             Console.WriteLine("First example: Without interceptors");
             await RunFoo (new SampleClass());
 
             Console.WriteLine("Second example: With classic interceptor");
-            await RunFoo (new SampleClass_genIntercepted(new SampleSyncTracingInterceptor()));
+            await RunFoo (proxyGenerator.CreateClassProxy<SampleClass>(new SampleSyncTracingInterceptor()));
 
             Console.WriteLine("Third example: With async interceptor");
-            await RunFoo (new SampleClass_genIntercepted(new AsyncToSyncInterceptorAdapter(new SampleAsyncTracingInterceptor())));
+            await RunFoo (proxyGenerator.CreateClassProxy<SampleClass>(new AsyncToSyncInterceptorAdapter(new SampleAsyncTracingInterceptor())));
         }
 
         private static async Task RunFoo(SampleClass instance)

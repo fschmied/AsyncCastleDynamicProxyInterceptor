@@ -1,10 +1,11 @@
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using AsyncInterceptor.CastleDynamicProxySimulation;
+using Castle.DynamicProxy;
 
 namespace AsyncInterceptor.AsyncDynamicProxyExtensions
 {
-    class AsyncToSyncInterceptorAdapter : ISyncInterceptor
+    class AsyncToSyncInterceptorAdapter : IInterceptor
     {
         private IAsyncInterceptor _asyncInterceptor;
 
@@ -13,29 +14,30 @@ namespace AsyncInterceptor.AsyncDynamicProxyExtensions
             _asyncInterceptor = asyncInterceptor;
         }
 
-        public void Intercept(ISyncInvocation invocation)
+        public void Intercept(IInvocation invocation)
         {
             var asyncInvocation = new SyncToAsyncVoidInvocationAdapter(invocation);
-            invocation.Result = _asyncInterceptor.Intercept(asyncInvocation);
+            var asyncInterceptorTask = _asyncInterceptor.Intercept(asyncInvocation);
+            invocation.ReturnValue = asyncInterceptorTask;
         }
 
         class SyncToAsyncVoidInvocationAdapter : IAsyncVoidInvocation
         {
-            private ISyncInvocation _syncInvocation;
+            private IInvocation _syncInvocation;
 
-            public SyncToAsyncVoidInvocationAdapter(ISyncInvocation syncInvocation)
+            public SyncToAsyncVoidInvocationAdapter(IInvocation syncInvocation)
             {
                 _syncInvocation = syncInvocation;
             }
 
-            public object[] Arguments { get => _syncInvocation.Arguments; set => _syncInvocation.Arguments = value; }
+            public object[] Arguments { get => _syncInvocation.Arguments; }
 
             public MethodInfo Method => _syncInvocation.Method;
 
             public Task Proceed()
             {
                 _syncInvocation.Proceed();
-                return (Task) _syncInvocation.Result;
+                return (Task) _syncInvocation.ReturnValue;
             }
         }
     }

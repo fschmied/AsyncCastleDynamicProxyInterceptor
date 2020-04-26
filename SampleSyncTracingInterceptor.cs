@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
-using AsyncInterceptor.CastleDynamicProxySimulation;
+using Castle.DynamicProxy;
 
 namespace AsyncInterceptor
 {
-    class SampleSyncTracingInterceptor : ISyncInterceptor
+    class SampleSyncTracingInterceptor : IInterceptor
     {
-        public void Intercept(ISyncInvocation invocation)
+        public void Intercept(IInvocation invocation)
         {
             Console.WriteLine("Sync Intercepting " + invocation.Method + "(" + string.Join(", ", invocation.Arguments.Select(x => x.ToString())) + ")");
             try
@@ -19,7 +19,7 @@ namespace AsyncInterceptor
                 throw;
             }
             Console.WriteLine("Sync Intercepted " + invocation.Method);
-            Console.WriteLine("Result: " + invocation.Result);
+            Console.WriteLine("Result: " + invocation.ReturnValue);
         }
     }
 }

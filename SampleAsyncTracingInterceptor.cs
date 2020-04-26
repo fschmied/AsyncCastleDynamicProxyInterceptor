@@ -11,11 +11,12 @@ namespace AsyncInterceptor
         public async Task Intercept(IAsyncVoidInvocation invocation)
         {
             Console.WriteLine("Async Intercepting " + invocation.Method + "(" + string.Join(", ", invocation.Arguments.Select(x => x.ToString())) + ")");
-            Console.WriteLine($"Async Interceptor will delay a bit... (thread before: {Thread.CurrentThread.ManagedThreadId})");
+            // Console.WriteLine($"Async Interceptor will delay a bit... (thread before: {Thread.CurrentThread.ManagedThreadId})");
 
-            await Task.Delay(TimeSpan.FromSeconds(5.0));
+            // NOT SUPPORTED: await before Proceed isn't supprted by DynamicProxy because it will reset what Proceed does as soon as we return a Task
+            // await Task.Delay(TimeSpan.FromSeconds(5.0));
 
-            Console.WriteLine($"Async Interceptor proceeding after delay (thread after: {Thread.CurrentThread.ManagedThreadId})");
+            // Console.WriteLine($"Async Interceptor proceeding after delay (thread after: {Thread.CurrentThread.ManagedThreadId})");
             try
             {
                 await invocation.Proceed();
