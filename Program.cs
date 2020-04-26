@@ -9,8 +9,13 @@ namespace AsyncInterceptor
     {
         static async Task Main(string[] args)
         {
+            Console.WriteLine("First example: Without interceptors");
             await RunFoo (new SampleClass());
+
+            Console.WriteLine("Second example: With classic interceptor");
             await RunFoo (new SampleClass_genIntercepted(new SampleSyncTracingInterceptor()));
+
+            Console.WriteLine("Third example: With async interceptor");
             await RunFoo (new SampleClass_genIntercepted(new AsyncToSyncInterceptorAdapter(new SampleAsyncTracingInterceptor())));
         }
 
@@ -18,15 +23,15 @@ namespace AsyncInterceptor
         {
             try
             {
-                await instance.Foo(42);
+                await instance.Foo(throwException: true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Caught exception!");
+                Console.WriteLine("Outermost runner caught exception!");
                 Console.WriteLine(ex);
             }
             Console.WriteLine("Done");
-            System.Console.WriteLine();
+            Console.WriteLine();
         }
     }
 }

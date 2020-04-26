@@ -12,16 +12,16 @@ namespace AsyncInterceptor.CastleDynamicProxySimulation
             this._interceptor = interceptor;
         }
 
-        public override Task Foo(int value)
+        public override Task Foo(bool throwException)
         {
-            var invocation = new FooInvocation(this, new object[] { value });
+            var invocation = new FooInvocation(this, new object[] { throwException });
             _interceptor.Intercept(invocation);
             return (Task)invocation.Result;
         }
 
-        private Task base_Foo(int value)
+        private Task base_Foo(bool throwException)
         {
-            return base.Foo(value);
+            return base.Foo(throwException);
         }
 
         private class FooInvocation : ISyncInvocation
@@ -43,7 +43,7 @@ namespace AsyncInterceptor.CastleDynamicProxySimulation
 
             public void Proceed()
             {
-                Result = _instance.base_Foo((int) Arguments[0]);
+                Result = _instance.base_Foo((bool) Arguments[0]);
             }
         }
     }
